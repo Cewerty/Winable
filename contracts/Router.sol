@@ -16,12 +16,13 @@ contract Router {
     function addLiquidity(
         address tokenA,
         address tokenB,
+        address lptoken,
         uint256 amountADesired,
         uint256 amountBDesired
     ) external {
         address pool = factory.getPool(tokenA, tokenB);
         if (pool == address(0)) {
-            factory.createPool(tokenA, tokenB);
+            factory.createPool(tokenA, tokenB, lptoken);
             pool = factory.getPool(tokenA, tokenB);
         }
         

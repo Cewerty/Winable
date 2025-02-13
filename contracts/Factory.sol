@@ -7,7 +7,7 @@ contract Factory {
     mapping(address => mapping(address => address)) public pools;
     address[] public allPools;
 
-    function createPool(address tokenA, address tokenB) external {
+    function createPool(address tokenA, address tokenB, address lptoken) external {
         require(tokenA != tokenB, "Identical tokens");
         (address token0, address token1) = tokenA < tokenB 
             ? (tokenA, tokenB) 
@@ -16,7 +16,7 @@ contract Factory {
         require(pools[token0][token1] == address(0), "Pool exists");
         
         Pool pool = new Pool();
-        pool.initialize(token0, token1);
+        pool.initialize(token0, token1, lptoken);
         pools[token0][token1] = address(pool);
         allPools.push(address(pool));
     }
