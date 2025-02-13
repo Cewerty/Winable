@@ -19,6 +19,14 @@ async function main() {
 
     const secondTokenAddress = await secondToken.getAddress();
 
+    const LptokenFactory = await hre.ethers.getContractFactory("LPToken", deployer);
+
+    const LpToken = await LptokenFactory.deploy(0, "LpToken", 18, "LP");
+
+    LpToken.waitForDeployment();
+
+    const LpTokenAddress = await LpToken.getAddress();
+
     const factoryFactory = await hre.ethers.getContractFactory("Factory", deployer);
 
     const factory = await factoryFactory.deploy();
@@ -37,6 +45,7 @@ async function main() {
 
     console.log("Token A: ", firstTokenAddress);
     console.log("Token B: ", secondTokenAddress);
+    console.log("LpToken: ", LpTokenAddress);
     console.log("Factory: ", factoryAddress);
     console.log("Router: ", routerAddress);
 }
