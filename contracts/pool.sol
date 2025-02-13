@@ -6,9 +6,12 @@ import "./ERC20.sol";
 contract Pool {
     address public token0;
     address public token1;
+    address public Lptoken;
+
     address public factory;
     address public owner;
     
+    uint256 public LpReserve;
     uint256 public reserve0;
     uint256 public reserve1;
     uint256 public totalSupply;
@@ -17,10 +20,11 @@ contract Pool {
         factory = msg.sender;
     }
 
-    function initialize(address _token0, address _token1) external {
+    function initialize(address _token0, address _token1, address _lpToken) external {
         require(msg.sender == factory, "Only factory");
         token0 = _token0;
         token1 = _token1;
+        Lptoken = _lpToken;
         owner = tx.origin;
     }
 
@@ -37,15 +41,21 @@ contract Pool {
                 (amount1 * totalSupply) / reserve1
             );
         }
+        IERC20Burnable(Lptoken).mint(liquidity);
+        IERC20Burnable(Lptoken).transfer(msg.sender, liquidity);
+        
         _updateReserves();
     }
 
     function removeLiquidity(uint256 liquidity) external {
+        require(LpReserve >= liquidity, "Not enought lp tokens for removing liquidity");
         uint256 amount0 = (liquidity * reserve0) / totalSupply;
         uint256 amount1 = (liquidity * reserve1) / totalSupply;
-    
+
+        IERC20Burnable(Lptoken).burnFrom(msg.sender, liquidity);
         IERC20(token0).transfer(msg.sender, amount0);
         IERC20(token1).transfer(msg.sender, amount1);
+
         _updateReserves();
     }
 
@@ -70,6 +80,7 @@ contract Pool {
     function _updateReserves() private {
         reserve0 = IERC20(token0).balanceOf(address(this));
         reserve1 = IERC20(token1).balanceOf(address(this));
+        LpReserve = IERC20Burnable(Lptoken).balanceOf(owner);
     }
 
     function sqrt(uint256 x) private pure returns (uint256) {
